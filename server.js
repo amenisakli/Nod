@@ -1,6 +1,6 @@
-const bodyParser = require('body-parser');
-const http = require ('http')
+const bodyParser = require('body-parser')
 const express = require('express')
+const mongoose = require('mongoose')
 const saucesRoutes = require('./routes/sauces.js')
 const usersRoutes = require('./routes/users.js')
 
@@ -15,12 +15,16 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
-app.set('port',process.env.PORT || 3000)
-const server = http.createServer(app)
+app.use(express.urlencoded({extented:true}))
 
 app.use('/', saucesRoutes)
 app.use('/', usersRoutes)
 
-server.listen(process.env.PORT || 3000)
+mongoose.connect('mongodb+srv://Alexandre:yWQMapVoCaKBMapE@cluster0.54sr2im.mongodb.net/',/*{useNewUrlParser:true,useUnifiedTopology:true}*/)
+.then(()=> {
+    console.log('connecté')
+    app.listen(process.env.PORT || 3000, () => console.log(`l'application lancée`))
+})
+
 
 module.exports = app
