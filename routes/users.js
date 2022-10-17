@@ -3,7 +3,7 @@ const router = express.Router()
 const auth = require('../middleware/auth')
 const usersControllers = require('../controllers/users.js')
 
-router.post('/api/auth/signup', auth, usersControllers.signup)
-router.get('/api/auth/login', auth, usersControllers.login)
+router.post('/api/auth/signup', usersControllers.signup)
+router.post('/api/auth/login', usersControllers.login)
  
 module.exports = router
