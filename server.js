@@ -1,4 +1,3 @@
-const bodyParser = require('body-parser')
 const express = require('express')
 const mongoose = require('mongoose')
 const saucesRoutes = require('./routes/sauces.js')
@@ -14,7 +13,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(bodyParser.json());
+app.use(express.json());
 
 app.use(express.urlencoded({extented:true}))
 
