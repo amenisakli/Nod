@@ -1,6 +1,7 @@
 const User = require('../models/users')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+require('dotenv').config()
 
 exports.signup = async (req, res) => {
     const {email, password} = req.body
@@ -35,7 +36,7 @@ exports.login = async (req, res) => {
                 userId : user._id,
                 token : jwt.sign(
                     {userId : user._id},
-                    'PROJET_6_OPENCLASSROOM',
+                    process.env.PHRASECRYPT,
                     {expiresIn : '24h'}
                 )
             })

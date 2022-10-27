@@ -21,7 +21,8 @@ app.use('/', saucesRoutes)
 app.use('/', usersRoutes)
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-mongoose.connect('mongodb+srv://Alexandre:yWQMapVoCaKBMapE@cluster0.54sr2im.mongodb.net/',/*{useNewUrlParser:true,useUnifiedTopology:true}*/)
+require('dotenv').config()
+mongoose.connect(process.env.CONNEXION,/*{useNewUrlParser:true,useUnifiedTopology:true}*/)
 .then(()=> {
     console.log('connecté')
     app.listen(process.env.PORT || 3000, () => console.log(`l'application lancée`))

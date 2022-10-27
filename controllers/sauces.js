@@ -1,4 +1,5 @@
 const Sauce = require('../models/sauces')
+const fs = require('fs')
 
 exports.creation = (req, res, next) => {
    const sauceObject = JSON.parse(req.body.sauce);
@@ -56,6 +57,10 @@ exports.modification = async (req, res) => {
         upadtedSauce = req.body
     }
     else{
+        const nomDuFichier = sauces.imageUrl.split('/images/')[1]
+        await fs.unlink(`images/${nomDuFichier}`,(err) => {
+            if (err) throw err;
+        })
         upadtedSauce = JSON.parse(req.body.sauce)
         upadtedSauce.imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
     }
@@ -73,6 +78,10 @@ exports.suppression = async (req, res) => {
         return res.status(403).json({message : `pas le droit`})
     }
     try{
+        const nomDuFichier = sauces.imageUrl.split('/images/')[1]
+        await fs.unlink(`images/${nomDuFichier}`,(err) => {
+            if (err) throw err;
+         })
         await Sauce.deleteOne({_id: req.params.id})
         return res.status(200).json({message : `supprimé `})
     }
@@ -83,23 +92,34 @@ exports.suppression = async (req, res) => {
 
 exports.like = async (req, res) => {
     const like = req.body.like
-    if(like === 1){
-        await Sauce.updateOne({_id: req.params.id}, {$inc : {likes : 1}, $push : {usersLiked : req.body.userId}, _id  : req.params.id} )
-        res.status(200).json({message : `ajouté`})
-    }
-    else if(like === -1){
-        await Sauce.updateOne({_id: req.params.id}, {$inc : {dislikes : 1}, $push : {usersDisliked : req.body.userId}, _id  : req.params.id} )
-        res.status(200).json({message : `ajouté`})
-    }
-    else{
-        const sauce = await Sauce.findOne({ _id: req.params.id })
-        if(sauce.usersLiked.indexOf(req.body.userId) !== -1){
-            await Sauce.updateOne({_id: req.params.id}, {$inc : {likes : -1}, $pull : {usersLiked : req.body.userId}, _id  : req.params.id} )
-        res.status(200).json({message : `supprimé`})
+    console.log(like)
+    console.log(req.params.id)
+    try{
+        const sauces = await Sauce.findOne({ _id: req.params.id })
+        if(!sauces){
+            return res.status(404).json({message : `not found`})
         }
-        if(sauce.usersDisliked.indexOf(req.body.userId) !== -1){
-            await Sauce.updateOne({_id: req.params.id}, {$inc : {dislikes : -1}, $pull : {usersDisliked : req.body.userId}, _id  : req.params.id} )
-        res.status(200).json({message : `supprimé`})
+        if(like == Number(1)){
+            await Sauce.updateOne({_id: req.params.id}, {$inc : {likes : 1}, $push : {usersLiked : req.body.userId}, _id  : req.params.id} )
+            return res.status(200).json({message : `ajouté`})
         }
+        else if(like == Number(-1)){
+            await Sauce.updateOne({_id: req.params.id}, {$inc : {dislikes : 1}, $push : {usersDisliked : req.body.userId}, _id  : req.params.id} )
+            return res.status(200).json({message : `ajouté`})
+        }
+        else{
+            const sauce = await Sauce.findOne({ _id: req.params.id })
+            if(sauce.usersLiked.indexOf(req.body.userId) !== -1){
+                await Sauce.updateOne({_id: req.params.id}, {$inc : {likes : -1}, $pull : {usersLiked : req.body.userId}, _id  : req.params.id} )
+                return res.status(200).json({message : `supprimé`})
+            }
+            if(sauce.usersDisliked.indexOf(req.body.userId) !== -1){
+                await Sauce.updateOne({_id: req.params.id}, {$inc : {dislikes : -1}, $pull : {usersDisliked : req.body.userId}, _id  : req.params.id} )
+                return res.status(200).json({message : `supprimé`})
+            }
+        }
+    }
+    catch(e){
+        return res.status(404).json({message: `not found`})
     }
 }
